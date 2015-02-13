@@ -11,13 +11,18 @@ library(igraphdata)
 library(gtools)
 
 #Control Parameters
+#Plot 1-Average Diameter, 2-Centrality, 3-Euler Paths, 4-Average Path Length
+PLOTNUM = 3
 NODES = 10
 EDGES = 10
 LOOPS = 100
 set.seed(37251)
 ## Plot for euler Paths alone - because of forced axis scaling to 10x10.
-#plot(0:10, 0:10,xlab="Nodes",ylab="% Euler Paths", yaxt='n')
-plot(0:10, 0:10,xlab="Nodes",ylab="")
+if(PLOTNUM == 3){
+  plot(0:max(NODES,EDGES), 0:max(NODES,EDGES),xlab="Nodes",ylab="% Euler Paths", yaxt='n')
+}else{
+  plot(0:max(NODES,EDGES), 0:max(NODES,EDGES),xlab="Nodes",ylab="")
+}
 par(xpd=TRUE)
 colors = heat.colors(NODES)
 
@@ -100,14 +105,14 @@ diameter = diameter + diameter(G)
 }
 ## Matrix of N by E
 M[j,4*(i-1)-3] = signif(avPath/length(loops),digits=4)
-M[j,4*(i-1)-2] = ep/totsubs*10
+M[j,4*(i-1)-2] = ep/totsubs*max(NODES,EDGES)
 M[j,4*(i-1)-1] = centerDeg/length(loops)
 M[j,4*(i-1)] = diameter/length(loops)
 
 }
 }
 ########Plots!
-
+if(PLOTNUM==1){
 # Plot 1 - Average Diameter
 ## Y is the output that is being correlated, X is the number of nodes. 
 y <- M[,4*(i-1)]
@@ -122,56 +127,58 @@ if(i>2){
   #xspline(x,y)
 }
 legend(-3,-3, legend = 2:NODES, col=colors, pch=20, horiz=TRUE, cex=.65, title = "Average Graph Diameter vs Number of Paths")
+}
 
-# # Plot 2 - Average Maximum Eigenvalue Centrality
-# ## Y is the output that is being correlated, X is the number of nodes. 
-# y <- M[,4*(i-1)-1]
-# x <- 1:length(y)
-# # For more than 2 nodes (where a linear model is relevant), fits a model to all data for a given number of nodes
-# ## Can uncomment for closer fitting for 10th degree polynomial 'lm' -> linear model
-# if(i>2){
-#   lo <- loess(y~x)
-#   #lm <- lm(y ~ poly(x, 10, raw=TRUE))
-#   p2 <- points(x,y, pch=20, col=colors[i])
-#   lines(predict(lo), col=colors[i], lwd=2)
-#   #xspline(x,y)
-# }
-# legend(-3,-3, legend = 2:NODES, col=colors, pch=20, horiz=TRUE, cex=.65, title = "Average Maximum Eigenvalue vs Number of Paths")
+if(PLOTNUM==2){
+# Plot 2 - Average Maximum Eigenvalue Centrality
+## Y is the output that is being correlated, X is the number of nodes. 
+y <- M[,4*(i-1)-1]
+x <- 1:length(y)
+# For more than 2 nodes (where a linear model is relevant), fits a model to all data for a given number of nodes
+## Can uncomment for closer fitting for 10th degree polynomial 'lm' -> linear model
+if(i>2){
+  lo <- loess(y~x)
+  #lm <- lm(y ~ poly(x, 10, raw=TRUE))
+  p2 <- points(x,y, pch=20, col=colors[i])
+  lines(predict(lo), col=colors[i], lwd=2)
+  #xspline(x,y)
+}
+legend(-3,-3, legend = 2:NODES, col=colors, pch=20, horiz=TRUE, cex=.65, title = "Average Maximum Eigenvalue vs Number of Paths")
+}
 
+if(PLOTNUM==3){
+# Plot 3 - Pecentage of the time there are Euler Paths
+## Y is the output that is being correlated, X is the number of nodes. 
+y <- M[,4*(i-1)-2]
+x <- 1:length(y)
+# For more than 2 nodes (where a linear model is relevant), fits a model to all data for a given number of nodes
+## Can uncomment for closer fitting for 10th degree polynomial 'lm' -> linear model
+if(i>2){
+  lo <- loess(y~x)
+  #lm <- lm(y ~ poly(x, 10, raw=TRUE))
+  points(x,y, pch=20, col=colors[i])
+  lines(predict(lo), col=colors[i], lwd=2)
+  #xspline(x,y)
+}
+legend(-3,-3, legend = 2:NODES, col=colors, pch=20, horiz=TRUE, cex=.65, title = "Percentage Euler Path vs Number of Paths")
+}
 
-#if(i>2){ ggplot2.multiplot(p1, p2, cols=2)}
-
-
-# # Plot 3 - Pecentage of the time there are Euler Paths
-# ## Y is the output that is being correlated, X is the number of nodes. 
-# y <- M[,4*(i-1)-2]
-# x <- 1:length(y)
-# # For more than 2 nodes (where a linear model is relevant), fits a model to all data for a given number of nodes
-# ## Can uncomment for closer fitting for 10th degree polynomial 'lm' -> linear model
-# if(i>2){
-#   lo <- loess(y~x)
-#   #lm <- lm(y ~ poly(x, 10, raw=TRUE))
-#   points(x,y, pch=20, col=colors[i])
-#   lines(predict(lo), col=colors[i], lwd=2)
-#   #xspline(x,y)
-# }
-# legend(-3,-3, legend = 2:NODES, col=colors, pch=20, horiz=TRUE, cex=.65, title = "Percentage Euler Path vs Number of Paths")
- 
-
-# # Plot 4 - Average Path Length
-# ## Y is the output that is being correlated, X is the number of nodes. 
-# y <- M[,4*(i-1)-3]
-# x <- 1:length(y)
-# # For more than 2 nodes (where a linear model is relevant), fits a model to all data for a given number of nodes
-# ## Can uncomment for closer fitting for 10th degree polynomial 'lm' -> linear model
-# if(i>2){
-#   lo <- loess(y~x)
-#   #lm <- lm(y ~ poly(x, 10, raw=TRUE))
-#   points(x,y, pch=20, col=colors[i])
-#   lines(predict(lo), col=colors[i], lwd=2)
-#   #xspline(x,y)
-# }
-# legend(-3,-3, legend = 2:NODES, col=colors, pch=20, horiz=TRUE, cex=.65, title = "Average Path Length vs Number of Paths")
+if(PLOTNUM==4){
+# Plot 4 - Average Path Length
+## Y is the output that is being correlated, X is the number of nodes. 
+y <- M[,4*(i-1)-3]
+x <- 1:length(y)
+# For more than 2 nodes (where a linear model is relevant), fits a model to all data for a given number of nodes
+## Can uncomment for closer fitting for 10th degree polynomial 'lm' -> linear model
+if(i>2){
+  lo <- loess(y~x)
+  #lm <- lm(y ~ poly(x, 10, raw=TRUE))
+  points(x,y, pch=20, col=colors[i])
+  lines(predict(lo), col=colors[i], lwd=2)
+  #xspline(x,y)
+}
+legend(-3,-3, legend = 2:NODES, col=colors, pch=20, horiz=TRUE, cex=.65, title = "Average Path Length vs Number of Paths")
+}
 
 }
 print(M)
